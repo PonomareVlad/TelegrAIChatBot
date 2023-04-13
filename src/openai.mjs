@@ -37,7 +37,7 @@ export const trimMessages = ({encoder, model, messages = [], minTokens = 1, maxT
         const system = messages.find(isSystem);
         if (system) messages.splice(messages.indexOf(system), 1);
         messages.shift();
-        messages.unshift(system);
+        if (system) messages.unshift(system);
     }
     return messages;
 }
