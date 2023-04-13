@@ -67,9 +67,14 @@ bot.command("summary", async ctx => {
 
 bot.command("history", ctx => {
     try {
+        const emoji = {
+            user: "👤",
+            system: "⚙️",
+            assistant: "🤖",
+        };
         const messages = sanitizeMessages(ctx.session.messages);
-        return messages.reduce((promise = Promise.resolve(), {name, role, content} = {}) => {
-            const message = `From: ${name || role}\r\n${content}`;
+        return messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
+            const message = `${emoji[role] || "⚠️"}: ${content}`;
             return promise.then(() => ctx.reply(message));
         }, Promise.resolve());
     } catch (e) {
