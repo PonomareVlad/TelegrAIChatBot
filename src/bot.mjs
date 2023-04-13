@@ -1,6 +1,6 @@
 import {Bot, session} from "grammy/web";
 import {freeStorage} from "@grammyjs/storage-free";
-import {API, isSystem, sanitizeMessages, sanitizeName} from "./openai.mjs";
+import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName} from "./openai.mjs";
 
 export const ai = new API(process.env.OPENAI_API_KEY);
 export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
@@ -59,6 +59,23 @@ bot.command("summary", async ctx => {
         const system = ctx.session.messages.find(isSystem);
         ctx.session.messages = [system, message].filter(Boolean);
         return result;
+    } catch (e) {
+        console.error(e);
+        return ctx.reply(e.message || e);
+    }
+});
+
+bot.command("tokens", async ctx => {
+    try {
+        const encoder = await initEncoder();
+        const messages = ctx.session.messages;
+        const tokens = chatTokens({encoder, messages});
+        const availableTokens = 4096 - tokens;
+        const message = [
+            `History: ${tokens}`,
+            `Available: ${availableTokens}`
+        ].join("\r\n");
+        return ctx.reply(message);
     } catch (e) {
         console.error(e);
         return ctx.reply(e.message || e);
