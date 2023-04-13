@@ -52,20 +52,30 @@ bot.command("start", ctx => {
 });
 
 bot.command("summary", async ctx => {
-    ctx.msg.text = `Summarize this conversation.`;
-    const result = await chatMessage(ctx);
-    const message = ctx.session.messages.pop();
-    const system = ctx.session.find(isSystem);
-    ctx.session.messages = [system, message].filter(Boolean);
-    return result;
+    try {
+        ctx.msg.text = `Summarize this conversation.`;
+        const result = await chatMessage(ctx);
+        const message = ctx.session.messages.pop();
+        const system = ctx.session.find(isSystem);
+        ctx.session.messages = [system, message].filter(Boolean);
+        return result;
+    } catch (e) {
+        console.error(e);
+        return ctx.reply(e.message || e);
+    }
 });
 
 bot.command("history", ctx => {
-    const messages = sanitizeMessages(ctx.session.messages);
-    return messages.reduce((promise = Promise.resolve(), {name, role, content} = {}) => {
-        const message = `From: ${name || role}\r\n${content}`;
-        return promise.then(() => ctx.reply(message));
-    }, Promise.resolve());
+    try {
+        const messages = sanitizeMessages(ctx.session.messages);
+        return messages.reduce((promise = Promise.resolve(), {name, role, content} = {}) => {
+            const message = `From: ${name || role}\r\n${content}`;
+            return promise.then(() => ctx.reply(message));
+        }, Promise.resolve());
+    } catch (e) {
+        console.error(e);
+        return ctx.reply(e.message || e);
+    }
 });
 
 bot.on("message:text", chatMessage);
