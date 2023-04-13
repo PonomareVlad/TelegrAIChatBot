@@ -9,6 +9,7 @@
     "tunnel": "cloudflared tunnel --url http://localhost:3000"
   },
   "dependencies": {
+    "@dqbd/tiktoken": "^1.0.6",
     "@grammyjs/storage-free": "^2.1.4",
     "grammy": "^1.15.3"
   },

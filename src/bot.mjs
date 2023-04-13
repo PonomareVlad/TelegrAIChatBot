@@ -21,30 +21,32 @@ bot.command("start", ctx => {
 bot.on("message:text", async ctx => {
     const {
         msg: {
-            text: content = ""
+            text = ""
         },
         session: {
             messages = []
         }
     } = ctx;
-    console.log("User:", content);
-    messages.push({role: "user", content});
-    await ctx.replyWithChatAction("typing");
+    const interval = setInterval(() => {
+        ctx.replyWithChatAction("typing").catch(console.error);
+    }, 5000);
     try {
+        await ctx.replyWithChatAction("typing");
+        messages.push({role: "user", content: text});
         const {
             choices: [
                 {
-                    message: {
-                        content = ""
-                    } = {}
+                    message = {}
                 } = {}
             ] = []
         } = await ai.chat({messages});
-        messages.push({role: "assistant", content});
-        console.log("Assistant:", content);
-        return ctx.reply(content);
+        messages.push(message);
+        return ctx.reply(message.content);
     } catch (e) {
+        console.error(e);
         return ctx.reply(e.message || e);
+    } finally {
+        clearInterval(interval);
     }
 });
 
