@@ -82,13 +82,13 @@ export class API {
             ...this.options,
             ...options
         };
-        if (system) setSystem(system, messages);
         const url = new URL(path, api);
         const headers = {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
         const encoder = await initEncoder();
+        if (system) setSystem(system, rawMessages);
         const messages = trimMessages({model, encoder, maxTokens, minTokens, messages: rawMessages});
         const max_tokens = maxTokens - chatTokens({model, encoder, messages});
         const body = JSON.stringify({model, max_tokens, messages});
