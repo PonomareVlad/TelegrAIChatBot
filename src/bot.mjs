@@ -56,7 +56,7 @@ bot.command("summary", async ctx => {
         ctx.msg.text = `Summarize this conversation.`;
         const result = await chatMessage(ctx);
         const message = ctx.session.messages.pop();
-        const system = ctx.session.find(isSystem);
+        const system = ctx.session.messages.find(isSystem);
         ctx.session.messages = [system, message].filter(Boolean);
         return result;
     } catch (e) {
