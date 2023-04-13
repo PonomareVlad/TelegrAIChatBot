@@ -8,6 +8,12 @@ const special_tokens = {
     "<|im_start|>": 100264,
 }
 
+export const isSystem = ({role} = {}) => role === "system";
+
+export const notSystem = ({role} = {}) => role !== "system";
+
+export const sanitizeName = name => name.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
+
 export async function initEncoder() {
     if (globalThis.encoder) return globalThis.encoder;
     const tokens = {...model.special_tokens, ...special_tokens};
@@ -24,14 +30,12 @@ export function getChatGPTEncoding(messages = [], model = "gpt-3.5-turbo") {
 }
 
 export const sanitizeMessages = messages => {
-    const map = ({role, content} = {}) => ({role, content});
+    const map = ({name, role, content} = {}) => ({name, role, content});
     const filter = ({role, content} = {}) => role && content;
     return messages.map(map).filter(filter);
 }
 
 export const trimMessages = ({encoder, model, messages = [], minTokens = 1, maxTokens = 4096} = {}) => {
-    const isSystem = ({role} = {}) => role === "system";
-    const notSystem = ({role} = {}) => role !== "system";
     const trimNeeded = () => maxTokens - chatTokens({model, encoder, messages}) < minTokens;
     while (messages.filter(notSystem).length && trimNeeded()) {
         const system = messages.find(isSystem);
