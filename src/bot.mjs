@@ -22,6 +22,7 @@ const handleError = async (ctx, e) => {
 const chatMessage = async ctx => {
     const {
         msg: {
+            message_id: id,
             text = ""
         },
         session: {
@@ -34,7 +35,7 @@ const chatMessage = async ctx => {
     const targetName = ctx.chat.first_name || ctx.chat.last_name || ctx.chat.username;
     try {
         await ctx.replyWithChatAction("typing");
-        messages.push({name: sanitizeName(targetName), role: "user", content: text});
+        messages.push({name: sanitizeName(targetName), role: "user", content: text, id});
         const {
             choices: [
                 {
@@ -42,8 +43,9 @@ const chatMessage = async ctx => {
                 } = {}
             ] = []
         } = await ai.chat({messages});
+        const {message_id} = await ctx.reply(message.content);
+        if (message_id) message.id = message_id;
         messages.push(message);
-        return ctx.reply(message.content);
     } catch (e) {
         return handleError(ctx, e);
     } finally {
@@ -75,10 +77,18 @@ bot.command("start", ctx => {
 
 bot.command("summary", async ctx => {
     try {
+        const {messages} = ctx.session;
+        const {message_id} = ctx?.msg?.reply_to_message || {};
+        if (message_id) {
+            const system = messages.find(isSystem);
+            const message = messages.find(({id}) => id === message_id);
+            ctx.session.messages = [system, message].filter(Boolean);
+            return ctx.reply("Selected message used as summary.");
+        }
         ctx.msg.text = ctx.match || config?.prompts?.summary;
         const result = await chatMessage(ctx);
-        const message = ctx.session.messages.pop();
-        const system = ctx.session.messages.find(isSystem);
+        const message = messages.pop();
+        const system = messages.find(isSystem);
         ctx.session.messages = [system, message].filter(Boolean);
         return result;
     } catch (e) {
