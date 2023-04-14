@@ -1,4 +1,4 @@
-import {Bot, session} from "grammy/web";
+import {Bot, session} from "grammy";
 import {hydrate} from "@grammyjs/hydrate";
 import {freeStorage} from "@grammyjs/storage-free";
 import {hydrateReply, parseMode} from "@grammyjs/parse-mode";
@@ -49,7 +49,7 @@ bot.use(session({
     storage: freeStorage(bot.token)
 }));
 
-bot.api.config.use(parseMode("Markdown"));
+bot.api.config.use(parseMode("markdown"));
 
 bot.command("start", ctx => {
     const message = ctx?.session?.messages?.length ?
