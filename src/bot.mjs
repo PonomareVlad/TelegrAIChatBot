@@ -120,6 +120,7 @@ bot.command("history", async ctx => {
             assistant: "🤖",
         };
         const messages = sanitizeMessages(ctx.session.messages);
+        await ctx.reply(`${messages.length} messages in history:`);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;
             return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e)));
