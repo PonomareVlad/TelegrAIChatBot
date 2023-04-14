@@ -1,5 +1,5 @@
-import config from "../config.json";
 import {Bot, session} from "grammy";
+import configs from "../configs.json";
 import {hydrate} from "@grammyjs/hydrate";
 import {autoRetry} from "@grammyjs/auto-retry";
 import {freeStorage} from "@grammyjs/storage-free";
@@ -70,7 +70,7 @@ bot.api.config.use(autoRetry({
 bot.api.config.use(parseMode("markdown"));
 
 bot.command("start", ctx => {
-    const message = ctx?.session?.messages?.length ? config.messages.new : config.messages.intro
+    const message = ctx?.session?.messages?.length ? configs.messages.new : configs.messages.intro
     ctx.session.messages = [];
     return ctx.reply(message);
 });
@@ -85,7 +85,7 @@ bot.command("summary", async ctx => {
             ctx.session.messages = [system, message].filter(Boolean);
             return ctx.reply("Selected message used as summary.");
         }
-        ctx.msg.text = ctx.match || config?.prompts?.summary;
+        ctx.msg.text = ctx.match || configs?.prompts?.summary;
         const result = await chatMessage(ctx);
         const message = messages.pop();
         const system = messages.find(isSystem);

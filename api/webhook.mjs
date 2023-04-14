@@ -1,5 +1,5 @@
 import bot from "../src/bot.mjs";
-import config from "../config.json";
+import configs from "../configs.json";
 
 const getURL = ({
                     headers = {},
@@ -12,7 +12,7 @@ const getURL = ({
 
 export default async ({headers}) => {
     const webhook = await bot.api.setWebhook(getURL({headers}));
-    const commands = await bot.api.setMyCommands(config?.commands || []);
+    const commands = await bot.api.setMyCommands(configs?.commands || []);
     return new Response(JSON.stringify({webhook, commands}));
 }
 
