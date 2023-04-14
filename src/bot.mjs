@@ -19,11 +19,21 @@ const handleError = async (ctx, e) => {
     }
 }
 
+const prepareMessage = ctx => {
+    if (!ctx?.msg?.reply_to_message?.text) return ctx?.msg?.text;
+    const pronoun = ctx.msg.reply_to_message.from.id === ctx.me.id ? "You" : "I";
+    return [
+        `${pronoun} said «`,
+        ctx.msg.reply_to_message.text,
+        `». \r\n`,
+        ctx.msg.text
+    ].join("");
+}
+
 const chatMessage = async ctx => {
     const {
         msg: {
-            message_id: id,
-            text = ""
+            message_id: id
         },
         session: {
             messages = []
@@ -32,10 +42,11 @@ const chatMessage = async ctx => {
     const interval = setInterval(() => {
         ctx.replyWithChatAction("typing").catch(console.error);
     }, 5000);
-    const targetName = ctx?.chat?.first_name || ctx?.chat?.last_name || ctx?.chat?.username;
     try {
+        const content = prepareMessage(ctx);
         await ctx.replyWithChatAction("typing");
-        messages.push({name: sanitizeName(targetName), role: "user", content: text, id});
+        const targetName = ctx?.chat?.first_name || ctx?.chat?.last_name || ctx?.chat?.username;
+        messages.push({name: sanitizeName(targetName), role: "user", content, id});
         const {
             choices: [
                 {
