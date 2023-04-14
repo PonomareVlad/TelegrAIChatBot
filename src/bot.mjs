@@ -68,7 +68,7 @@ bot.command("summary", async ctx => {
         ctx.session.messages = [system, message].filter(Boolean);
         return result;
     } catch (e) {
-        console.error(e);
+        console.error(e.message || e);
         return ctx.reply(e.message || e);
     }
 });
@@ -85,7 +85,7 @@ bot.command("tokens", async ctx => {
         ].join("\r\n");
         return ctx.reply(message);
     } catch (e) {
-        console.error(e);
+        console.error(e.message || e);
         return ctx.reply(e.message || e);
     }
 });
@@ -103,7 +103,7 @@ bot.command("history", ctx => {
             return promise.then(() => ctx.reply(message));
         }, Promise.resolve());
     } catch (e) {
-        console.error(e);
+        console.error(e.message || e);
         return ctx.reply(e.message || e);
     }
 });
