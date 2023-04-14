@@ -1,5 +1,5 @@
 import bot from "../src/bot.mjs";
-import {webhookCallback} from "grammy/web";
+import {webhookCallback} from "grammy";
 
 export default webhookCallback(bot, "std/http", "throw", 59000);
 
