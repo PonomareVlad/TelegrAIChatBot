@@ -1,5 +1,6 @@
 import {Bot, session} from "grammy";
 import {hydrate} from "@grammyjs/hydrate";
+import {autoRetry} from "@grammyjs/auto-retry";
 import {freeStorage} from "@grammyjs/storage-free";
 import {hydrateReply, parseMode} from "@grammyjs/parse-mode";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName} from "./openai.mjs";
@@ -56,6 +57,11 @@ bot.use(hydrateReply);
 bot.use(session({
     initial: () => ({messages: []}),
     storage: freeStorage(bot.token)
+}));
+
+bot.api.config.use(autoRetry({
+    maxDelaySeconds: 10,
+    maxRetryAttempts: 1,
 }));
 
 bot.api.config.use(parseMode("markdown"));
