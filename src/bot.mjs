@@ -1,5 +1,7 @@
 import {Bot, session} from "grammy/web";
+import {hydrate} from "@grammyjs/hydrate";
 import {freeStorage} from "@grammyjs/storage-free";
+import {hydrateReply, parseMode} from "@grammyjs/parse-mode";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName} from "./openai.mjs";
 
 export const ai = new API(process.env.OPENAI_API_KEY);
@@ -38,10 +40,16 @@ const chatMessage = async ctx => {
     }
 }
 
+bot.use(hydrate());
+
+bot.use(hydrateReply);
+
 bot.use(session({
     initial: () => ({messages: []}),
     storage: freeStorage(bot.token)
 }));
+
+bot.api.config.use(parseMode("Markdown"));
 
 bot.command("start", ctx => {
     const message = ctx?.session?.messages?.length ?
