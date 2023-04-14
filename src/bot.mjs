@@ -7,10 +7,10 @@ import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName} 
 export const ai = new API(process.env.OPENAI_API_KEY);
 export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
-const handleError = (ctx, e) => {
+const handleError = async (ctx, e) => {
     try {
         console.error(e.message || e);
-        return ctx.reply(e.message || e);
+        return await ctx.reply(e.message || e);
     } catch (e) {
         console.error(e.message || e);
     }
