@@ -53,7 +53,7 @@ export const chatTokens = ({encoder, model, messages = []} = {}) => {
 }
 
 export const setSystem = (content = "", messages = []) => {
-    let system = messages.find(({role} = {}) => role === "system");
+    let system = messages.find(isSystem);
     if (!system) messages.unshift(system = {});
     return Object.assign(system, {role: "system", content});
 }

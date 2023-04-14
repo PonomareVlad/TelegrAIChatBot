@@ -7,13 +7,28 @@
       "success": "Selected message used as summary.",
       "error": "Selected message out of history, please select a different one."
     },
+    "retry": {
+      "error": "Selected message out of history, please select a different one."
+    },
     "new": "You started a new conversation, the story was deleted.",
-    "intro": "Send any text message to start conversation."
+    "intro": "Send any text message to start conversation.",
+    "system": {
+      "success": "System message updated.",
+      "empty": "System message is empty."
+    }
   },
   "commands": [
     {
       "command": "start",
       "description": "Restart conversation"
+    },
+    {
+      "command": "system",
+      "description": "System message (role)"
+    },
+    {
+      "command": "retry",
+      "description": "Regenerate response"
     },
     {
       "command": "summary",
