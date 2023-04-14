@@ -32,7 +32,7 @@ const chatMessage = async ctx => {
     const interval = setInterval(() => {
         ctx.replyWithChatAction("typing").catch(console.error);
     }, 5000);
-    const targetName = ctx.chat.first_name || ctx.chat.last_name || ctx.chat.username;
+    const targetName = ctx?.chat?.first_name || ctx?.chat?.last_name || ctx?.chat?.username;
     try {
         await ctx.replyWithChatAction("typing");
         messages.push({name: sanitizeName(targetName), role: "user", content: text, id});
@@ -70,20 +70,22 @@ bot.api.config.use(autoRetry({
 bot.api.config.use(parseMode("markdown"));
 
 bot.command("start", ctx => {
-    const message = ctx?.session?.messages?.length ? configs.messages.new : configs.messages.intro
+    const message = ctx?.session?.messages?.length ?
+        configs?.messages?.new : configs?.messages?.intro
     ctx.session.messages = [];
     return ctx.reply(message);
 });
 
 bot.command("summary", async ctx => {
     try {
-        const {messages} = ctx.session;
+        const {messages = []} = ctx?.session || {};
         const {message_id} = ctx?.msg?.reply_to_message || {};
         if (message_id) {
             const system = messages.find(isSystem);
             const message = messages.find(({id}) => id === message_id);
+            if (!message) return ctx.reply(configs?.messages?.summary?.error);
             ctx.session.messages = [system, message].filter(Boolean);
-            return ctx.reply("Selected message used as summary.");
+            return ctx.reply(configs?.messages?.summary?.success);
         }
         ctx.msg.text = ctx.match || configs?.prompts?.summary;
         const result = await chatMessage(ctx);
@@ -99,7 +101,7 @@ bot.command("summary", async ctx => {
 bot.command("tokens", async ctx => {
     try {
         const encoder = await initEncoder();
-        const messages = ctx.session.messages;
+        const messages = ctx?.session?.messages || [];
         const tokens = chatTokens({encoder, messages});
         const availableTokens = 4096 - tokens;
         const message = [
@@ -119,7 +121,7 @@ bot.command("history", async ctx => {
             system: "⚙️",
             assistant: "🤖",
         };
-        const messages = sanitizeMessages(ctx.session.messages);
+        const messages = sanitizeMessages(ctx?.session?.messages || []);
         await ctx.reply(`${messages.length} messages in history:`);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;

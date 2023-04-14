@@ -3,6 +3,10 @@
     "summary": "Let's summarize our dialogue. Write a few paragraphs and add as many details as you can."
   },
   "messages": {
+    "summary": {
+      "success": "Selected message used as summary.",
+      "error": "Selected message out of history, please select a different one."
+    },
     "new": "You started a new conversation, the story was deleted.",
     "intro": "Send any text message to start conversation."
   },
