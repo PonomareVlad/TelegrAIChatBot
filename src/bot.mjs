@@ -98,7 +98,7 @@ bot.command("history", ctx => {
             assistant: "🤖",
         };
         const messages = sanitizeMessages(ctx.session.messages);
-        return messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
+        return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;
             return promise.then(() => ctx.reply(message));
         }, Promise.resolve());
