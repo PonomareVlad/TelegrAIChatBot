@@ -83,14 +83,14 @@ bot.command("tokens", async ctx => {
             `History: ${tokens}`,
             `Available: ${availableTokens}`
         ].join("\r\n");
-        return ctx.reply(message);
+        return await ctx.reply(message);
     } catch (e) {
         console.error(e.message || e);
         return ctx.reply(e.message || e);
     }
 });
 
-bot.command("history", ctx => {
+bot.command("history", async ctx => {
     try {
         const emoji = {
             user: "👤",
