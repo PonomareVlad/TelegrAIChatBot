@@ -109,7 +109,7 @@ bot.command("history", async ctx => {
         const messages = sanitizeMessages(ctx.session.messages);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;
-            return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e));
+            return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e)));
         }, Promise.resolve());
     } catch (e) {
         console.error(e.message || e);
