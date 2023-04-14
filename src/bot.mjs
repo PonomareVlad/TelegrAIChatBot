@@ -1,3 +1,4 @@
+import config from "../config.json";
 import {Bot, session} from "grammy";
 import {hydrate} from "@grammyjs/hydrate";
 import {autoRetry} from "@grammyjs/auto-retry";
@@ -67,16 +68,14 @@ bot.api.config.use(autoRetry({
 bot.api.config.use(parseMode("markdown"));
 
 bot.command("start", ctx => {
-    const message = ctx?.session?.messages?.length ?
-        "You started a new conversation, the story was deleted." :
-        "Send any text message to start conversation."
+    const message = ctx?.session?.messages?.length ? config.messages.new : config.messages.intro
     ctx.session.messages = [];
     return ctx.reply(message);
 });
 
 bot.command("summary", async ctx => {
     try {
-        ctx.msg.text = `Summarize this conversation.`;
+        ctx.msg.text = ctx.match || config?.prompts?.summary;
         const result = await chatMessage(ctx);
         const message = ctx.session.messages.pop();
         const system = ctx.session.messages.find(isSystem);

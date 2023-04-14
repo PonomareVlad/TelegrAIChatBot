@@ -1,4 +1,5 @@
 import bot from "../src/bot.mjs";
+import config from "../config.json";
 
 const getURL = ({
                     headers = {},
@@ -10,8 +11,9 @@ const getURL = ({
 }
 
 export default async ({headers}) => {
-    const result = await bot.api.setWebhook(getURL({headers}));
-    return new Response(JSON.stringify({result}));
+    const webhook = await bot.api.setWebhook(getURL({headers}));
+    const commands = await bot.api.setMyCommands(config?.commands || []);
+    return new Response(JSON.stringify({webhook, commands}));
 }
 
 export const config = {runtime: "edge"};

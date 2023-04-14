@@ -1,0 +1,27 @@
+{
+  "prompts": {
+    "summary": "Let's summarize our dialogue. Write a few paragraphs and add as many details as you can."
+  },
+  "messages": {
+    "new": "You started a new conversation, the story was deleted.",
+    "intro": "Send any text message to start conversation."
+  },
+  "commands": [
+    {
+      "command": "start",
+      "description": "Restart conversation"
+    },
+    {
+      "command": "summary",
+      "description": "Summarize conversation"
+    },
+    {
+      "command": "history",
+      "description": "Conversation history"
+    },
+    {
+      "command": "tokens",
+      "description": "Tokens usage"
+    }
+  ]
+}
