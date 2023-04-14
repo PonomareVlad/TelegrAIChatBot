@@ -93,7 +93,7 @@ export class API {
         }
         const encoder = await initEncoder();
         if (system) setSystem(system, rawMessages);
-        const messages = trimMessages({model, encoder, maxTokens, minTokens, messages: rawMessages});
+        const messages = trimMessages({model, encoder, maxTokens, minTokens, messages: sanitizeMessages(rawMessages)});
         const max_tokens = maxTokens - chatTokens({model, encoder, messages});
         const body = JSON.stringify({model, max_tokens, messages});
         const response = await fetch(url, {method: "post", headers, body});
