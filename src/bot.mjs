@@ -7,6 +7,15 @@ import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName} 
 export const ai = new API(process.env.OPENAI_API_KEY);
 export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
+const handleError = (ctx, e) => {
+    try {
+        console.error(e.message || e);
+        return ctx.reply(e.message || e);
+    } catch (e) {
+        console.error(e.message || e);
+    }
+}
+
 const chatMessage = async ctx => {
     const {
         msg: {
@@ -100,7 +109,7 @@ bot.command("history", async ctx => {
         const messages = sanitizeMessages(ctx.session.messages);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;
-            return promise.then(() => ctx.reply(message));
+            return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e));
         }, Promise.resolve());
     } catch (e) {
         console.error(e.message || e);
