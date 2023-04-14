@@ -9,8 +9,9 @@ export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
 const handleError = async (ctx, e) => {
     try {
-        console.error(e.message || e);
-        return await ctx.reply(e.message || e);
+        const message = e.message || e;
+        console.error(message);
+        return await ctx.reply(message);
     } catch (e) {
         console.error(e.message || e);
     }
@@ -42,8 +43,7 @@ const chatMessage = async ctx => {
         messages.push(message);
         return ctx.reply(message.content);
     } catch (e) {
-        console.error(e);
-        return ctx.reply(e.message || e);
+        return handleError(ctx, e);
     } finally {
         clearInterval(interval);
     }
@@ -77,8 +77,7 @@ bot.command("summary", async ctx => {
         ctx.session.messages = [system, message].filter(Boolean);
         return result;
     } catch (e) {
-        console.error(e.message || e);
-        return ctx.reply(e.message || e);
+        return handleError(ctx, e);
     }
 });
 
@@ -94,8 +93,7 @@ bot.command("tokens", async ctx => {
         ].join("\r\n");
         return await ctx.reply(message);
     } catch (e) {
-        console.error(e.message || e);
-        return ctx.reply(e.message || e);
+        return handleError(ctx, e);
     }
 });
 
@@ -112,8 +110,7 @@ bot.command("history", async ctx => {
             return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e)));
         }, Promise.resolve());
     } catch (e) {
-        console.error(e.message || e);
-        return ctx.reply(e.message || e);
+        return handleError(ctx, e);
     }
 });
 
