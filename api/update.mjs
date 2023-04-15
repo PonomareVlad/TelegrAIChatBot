@@ -20,6 +20,7 @@ export default async (req, ctx) => {
         async pull(controller) {
             fetch(`https://edge.requestcatcher.com/pull`).then(r => r.text());
             await limit;
+            ctx.waitUntil(wait(waitLimit));
             fetch(`https://edge.requestcatcher.com/limit`).then(r => r.text());
             return controller.close();
         }
@@ -30,7 +31,6 @@ export default async (req, ctx) => {
         streamController.close();
     });
     setInterval(() => fetch(`https://edge.requestcatcher.com/time/${time += 10}`).then(r => r.text()), 10000);
-    ctx.waitUntil(wait(waitLimit));
     return new Response(stream);
 };
 
