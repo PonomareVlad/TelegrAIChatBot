@@ -7,7 +7,7 @@ const getURL = ({
                     header = "x-forwarded-host",
                 }) => {
     const host = headers?.get(header) || process.env.VERCEL_URL;
-    return new URL(`${host}/${path}`, "https://prolong-request.onrender.com").href;
+    return new URL(`https://prolong-request.onrender.com/https://${host}/${path}`).href;
 }
 
 export default async ({headers}) => {
