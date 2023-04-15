@@ -13,6 +13,7 @@ export default async ({url}) => {
             if (seconds-- < 1) return controller.close();
             await setTimeoutAsync(1000);
             console.log(seconds);
+            void (fetch("https://edge.requestcatcher.com/" + seconds));
             return controller.enqueue(encoder.encode(":" + seconds));
         }
     });
