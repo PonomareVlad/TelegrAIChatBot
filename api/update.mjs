@@ -6,7 +6,7 @@ const wait = promisify((a, f) => setTimeout(f, a));
 
 export default async (req, ctx) => {
     let streamController;
-    const waitLimit = 85_000;
+    const waitLimit = 75_000;
     const requestLimit = 50_000;
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
