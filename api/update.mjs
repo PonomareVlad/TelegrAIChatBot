@@ -32,7 +32,7 @@ export default async (req, ctx) => {
         fetch(`https://edge.requestcatcher.com/response`);
         // streamController.close();
     });
-    setInterval(() => fetch(`https://edge.requestcatcher.com/time/${++time}`), 1000);
+    setInterval(() => fetch(`https://edge.requestcatcher.com/time/${++time}`), 10000);
     ctx.waitUntil(wait(waitLimit));
     return new Response(stream);
 };
