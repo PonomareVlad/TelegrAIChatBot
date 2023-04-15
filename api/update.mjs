@@ -26,8 +26,8 @@ export default async (req, ctx) => {
         }
     });
     const handler = webhookCallback(bot, "std/http", "return", waitLimit);
-    handler(req, ctx).finally(() => {
-        fetch(`https://edge.requestcatcher.com/response`).then(r => r.text());
+    handler(req, ctx).finally(async () => {
+        await fetch(`https://edge.requestcatcher.com/response`).then(r => r.text());
         streamController.close();
     });
     setInterval(() => fetch(`https://edge.requestcatcher.com/time/${time += 10}`).then(r => r.text()), 10000);
