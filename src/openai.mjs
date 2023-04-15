@@ -75,7 +75,7 @@ export class API {
             token = "",
             system = "",
             prompt = "",
-            minTokens = 512,
+            minTokens = 1500,
             maxTokens = 4096,
             model = "gpt-3.5-turbo",
             path = "chat/completions",
