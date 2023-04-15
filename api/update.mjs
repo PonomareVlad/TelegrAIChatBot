@@ -25,10 +25,12 @@ export default async (req, ctx) => {
             }
         });
         handler(req, ctx).catch(() => undefined).finally(async () => {
-            await fetch(`https://edge.requestcatcher.com/response`).then(r => r.text());
+            console.log("Time:", time);
+            await fetch(`https://edge.requestcatcher.com/response/${time}`).then(r => r.text());
             streamController.close();
         });
-        setInterval(() => fetch(`https://edge.requestcatcher.com/time/${time += 10}`).then(r => r.text()), 10000);
+        setInterval(() => fetch(`https://edge.requestcatcher.com/time/${time}`).then(r => r.text()), 10000);
+        setInterval(() => time++, 1000);
         return new Response(stream);
     } catch (e) {
         console.error(e);
