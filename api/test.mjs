@@ -13,6 +13,7 @@ export default async ({url}) => {
         async pull(controller) {
             await setTimeoutAsync(delay);
             controller.enqueue(encoder.encode(String(Date.now() - start)));
+            await setTimeoutAsync(1000);
             return controller.close();
         }
     });
