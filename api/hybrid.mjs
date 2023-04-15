@@ -7,7 +7,7 @@ const setTimeoutAsync = promisify((a, f) => setTimeout(f, a));
 export default async ({url}, ctx) => {
     let wait;
     let time = 0;
-    const limit = 30;
+    const limit = 59;
     const seconds = parseInt(new URL(url).searchParams.get("seconds") || 100);
     const streamPromise = new Promise(function (resolve, reject) {
         wait = {resolve: resolve, reject: reject};
