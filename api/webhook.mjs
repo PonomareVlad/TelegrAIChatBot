@@ -3,7 +3,7 @@ import configs from "../configs.json";
 
 const getURL = ({
                     headers = {},
-                    path = "api/hybrid",
+                    path = "api/update",
                     header = "x-forwarded-host",
                 }) => {
     const host = headers?.get(header) || process.env.VERCEL_URL;
