@@ -82,6 +82,7 @@ bot.api.config.use(autoRetry({
 }));
 
 bot.command("start", ctx => {
+    console.debug("/start");
     const message = ctx?.session?.messages?.length ?
         configs?.messages?.new : configs?.messages?.intro
     ctx.session.messages = [];
@@ -90,6 +91,7 @@ bot.command("start", ctx => {
 
 bot.command("retry", async ctx => {
     try {
+        console.debug("/retry");
         const {messages = []} = ctx?.session || {};
         const {message_id} = ctx?.msg?.reply_to_message || {};
         if (message_id) {
@@ -107,6 +109,7 @@ bot.command("retry", async ctx => {
 
 bot.command("summary", async ctx => {
     try {
+        console.debug("/summary");
         const {messages = []} = ctx?.session || {};
         const {message_id} = ctx?.msg?.reply_to_message || {};
         if (message_id) {
@@ -129,6 +132,7 @@ bot.command("summary", async ctx => {
 
 bot.command("system", async ctx => {
     try {
+        console.debug("/system");
         const {messages = []} = ctx?.session || {};
         if (!ctx.match) {
             const {content} = messages.find(isSystem) || {};
@@ -143,6 +147,7 @@ bot.command("system", async ctx => {
 
 bot.command("tokens", async ctx => {
     try {
+        console.debug("/tokens");
         const encoder = await initEncoder();
         const messages = ctx?.session?.messages || [];
         if (!messages.length) {
@@ -166,6 +171,7 @@ bot.command("tokens", async ctx => {
 
 bot.command("history", async ctx => {
     try {
+        console.debug("/history");
         const emoji = {
             user: "👤",
             system: "⚙️",
