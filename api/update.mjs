@@ -7,8 +7,8 @@ const wait = promisify((a, f) => setTimeout(f, a));
 export default async (req, ctx) => {
     let time = 0;
     let streamController;
-    const waitLimit = 75_000;
-    const requestLimit = 50_000;
+    const waitLimit = 85_000;
+    const requestLimit = 58_000;
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
         start: controller => {
@@ -30,7 +30,7 @@ export default async (req, ctx) => {
     handler(req, ctx).finally(() => {
         console.log("response");
         fetch(`https://edge.requestcatcher.com/response`).then(r => r.text());
-        // streamController.close();
+        streamController.close();
     });
     setInterval(() => fetch(`https://edge.requestcatcher.com/time/${++time}`).then(r => r.text()), 10000);
     ctx.waitUntil(wait(waitLimit));
