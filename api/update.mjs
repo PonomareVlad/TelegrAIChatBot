@@ -1,10 +1,12 @@
 import {promisify} from "util";
 import bot from "../src/bot.mjs";
 import {webhookCallback} from "grammy";
+import {fetch} from "grammy/out/shim.node";
 
 const wait = promisify((a, f) => setTimeout(f, a));
 
 export default async (req, ctx) => {
+    let time = 0;
     let streamController;
     const waitLimit = 75_000;
     const requestLimit = 50_000;
@@ -31,6 +33,7 @@ export default async (req, ctx) => {
         fetch(`https://edge.requestcatcher.com/response`);
         streamController.close();
     });
+    setInterval(() => fetch(`https://edge.requestcatcher.com/time/${++time}`), 1000);
     ctx.waitUntil(wait(waitLimit));
     return new Response(stream);
 };
