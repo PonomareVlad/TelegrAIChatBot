@@ -6,7 +6,7 @@ const setTimeoutAsync = promisify((a, f) => setTimeout(f, a));
 
 export default async ({url}) => {
     const encoder = new TextEncoder();
-    let seconds = parseInt(new URL(url).searchParams.get("seconds") || 1);
+    let seconds = parseInt(new URL(url).searchParams.get("seconds") || 100);
     const stream = new ReadableStream({
         start: controller => controller.enqueue(encoder.encode(String(seconds))),
         async pull(controller) {
