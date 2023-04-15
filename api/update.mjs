@@ -1,7 +1,6 @@
 import {promisify} from "util";
 import bot from "../src/bot.mjs";
 import {webhookCallback} from "grammy";
-import {fetch} from "grammy/out/shim.node";
 
 const wait = promisify((a, f) => setTimeout(f, a));
 
