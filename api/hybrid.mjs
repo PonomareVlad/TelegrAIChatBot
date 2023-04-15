@@ -7,11 +7,11 @@ const setTimeoutAsync = promisify((a, f) => setTimeout(f, a));
 export default async ({url}, ctx) => {
     const encoder = new TextEncoder();
     let time = 0;
-    let limit = 10;
+    let limit = 30;
     let seconds = parseInt(new URL(url).searchParams.get("seconds") || 100);
     ctx.waitUntil((async () => {
         await setTimeoutAsync(limit * 1000);
-        while (time++ < seconds) {
+        while (++time < seconds) {
             await setTimeoutAsync(1000);
             void (fetch("https://edge.requestcatcher.com/wait/" + time));
             console.log(time);
