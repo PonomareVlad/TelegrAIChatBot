@@ -16,12 +16,12 @@ export default async ({url}, ctx) => {
             if (time > seconds) return controller.close();
             await setTimeoutAsync(1000);
             console.log(time);
-            void (fetch("https://edge.requestcatcher.com/" + time));
+            void (fetch("https://edge.requestcatcher.com/stream/" + time));
             if (time < limit) return controller.enqueue(encoder.encode(":" + time));
             ctx.waitUntil((async () => {
                 while (time++ < seconds) {
                     await setTimeoutAsync(1000);
-                    void (fetch("https://edge.requestcatcher.com/" + time));
+                    void (fetch("https://edge.requestcatcher.com/wait/" + time));
                     console.log(time);
                 }
             })());
