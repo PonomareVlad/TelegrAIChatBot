@@ -15,13 +15,11 @@ export default async (req, ctx) => {
             start: controller => {
                 fetch(`https://edge.requestcatcher.com/start`).then(r => r.text());
                 streamController = controller;
-                controller.enqueue(encoder.encode(String("OK")));
+                controller.enqueue(encoder.encode(String("A few hours later ")));
             },
             async pull(controller) {
-                fetch(`https://edge.requestcatcher.com/pull`).then(r => r.text());
-                await wait(waitLimit);
-                fetch(`https://edge.requestcatcher.com/limit`).then(r => r.text());
-                return controller.close();
+                await wait(1000);
+                controller.enqueue(encoder.encode(String(".")));
             }
         });
         handler(req, ctx).catch(() => undefined).finally(async () => {
