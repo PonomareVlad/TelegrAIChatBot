@@ -14,6 +14,7 @@
     "@grammyjs/hydrate": "^1.3.1",
     "@grammyjs/parse-mode": "^1.6.0",
     "@grammyjs/storage-free": "^2.1.4",
+    "edge-grammy": "^0.0.1",
     "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1"
   },
   "overrides": {
