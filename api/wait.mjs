@@ -10,6 +10,7 @@ export default async ({url}, ctx) => {
         await setTimeoutAsync(1000);
         while (seconds-- > 0) {
             await setTimeoutAsync(1000);
+            void (fetch("https://edge.requestcatcher.com/" + seconds));
             console.log(seconds);
         }
     })());
