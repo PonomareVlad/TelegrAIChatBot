@@ -15,30 +15,36 @@ const unauthorized = () => new Response('"unauthorized"', {
     statusText: WRONG_TOKEN_ERROR,
 });
 
+const encoder = new TextEncoder();
+
 const stdHttp = (req, ctx) => {
-    let resolveResponse;
+    let streamController;
     const waitLimit = 85_000;
     const requestLimit = 55_000;
     ctx.waitUntil(wait(waitLimit));
-    const timeout = setTimeout(() => resolveResponse(ok()), requestLimit);
+    const stream = new ReadableStream({
+        start: controller => {
+            streamController = controller;
+            controller.enqueue(encoder.encode(String("OK")))
+        },
+        async pull(controller) {
+            await wait(requestLimit);
+            return controller.close();
+        }
+    });
     return {
         update: req.json(),
         header: req.headers.get(SECRET_HEADER) || undefined,
         end: () => {
-            if (resolveResponse)
-                resolveResponse(ok());
+            if (streamController) streamController.close();
         },
         respond: (json) => {
-            if (resolveResponse)
-                resolveResponse(okJson(json));
+            if (streamController) streamController.close();
         },
         unauthorized: () => {
-            if (resolveResponse)
-                resolveResponse(unauthorized());
+            if (streamController) streamController.close();
         },
-        handlerReturn: new Promise((resolve) => {
-            resolveResponse = resolve;
-        }).finally(() => clearTimeout(timeout)),
+        handlerReturn: new Response(stream)
     };
 };
 
