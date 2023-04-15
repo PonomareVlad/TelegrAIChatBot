@@ -7,7 +7,7 @@ const setTimeoutAsync = promisify((a, f) => setTimeout(f, a));
 export default async ({url}, ctx) => {
     const encoder = new TextEncoder();
     let time = 0;
-    let limit = 55;
+    let limit = 10;
     let seconds = parseInt(new URL(url).searchParams.get("seconds") || 100);
     ctx.waitUntil((async () => {
         await setTimeoutAsync(limit * 1000);
