@@ -35,7 +35,7 @@ const chatRequest = async ctx => {
     const result = await ai.chat({messages});
     const {message = {}} = result?.choices?.at?.(0) || {};
     console.log("🤖", message?.content);
-    const {message_id} = await ctx.reply(message?.content);
+    const {message_id} = await ctx.reply(message?.content.slice(0, 4096));
     if (message_id) message.id = message_id;
     messages.push(message);
     return result;
@@ -181,7 +181,7 @@ bot.command("history", async ctx => {
         await ctx.reply(`${messages.length} messages in history:`);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
             const message = `${emoji[role] || "⚠️"}: ${content}`;
-            return promise.then(() => ctx.reply(message).catch(e => handleError(ctx, e)));
+            return promise.then(() => ctx.reply(message.slice(0, 4096)).catch(e => handleError(ctx, e)));
         }, Promise.resolve());
     } catch (e) {
         return handleError(ctx, e);
