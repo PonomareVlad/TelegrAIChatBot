@@ -1,12 +1,9 @@
 import {marked} from "marked";
-import {Buffer} from 'node:buffer';
 import configs from "../configs.json";
-import {hydrate} from "@grammyjs/hydrate";
+import {md, Markdown} from "telegram-md";
 import decode from "html-entities-decoder";
-import {autoRetry} from "@grammyjs/auto-retry";
 import {Bot, InputFile, session} from "grammy";
 import {freeStorage} from "@grammyjs/storage-free";
-import {FormattedString, hydrateReply, fmt, code, pre} from "@grammyjs/parse-mode";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName, setSystem} from "./openai.mjs";
 
 export const ai = new API(process.env.OPENAI_API_KEY);
@@ -36,13 +33,15 @@ const prepareMessage = ctx => {
 const renderPart = ({type, text, raw, lang, tokens} = {}) => {
     switch (type) {
         case "paragraph": {
-            const parts = tokens.map(renderPart);
-            return fmt(parts.map(() => ""), ...parts);
+            const parts = tokens.map(renderPart).filter(Boolean);
+            return md(Array(++parts.length), ...parts);
         }
         case "codespan":
-            return fmt`${code(decode(text || raw))}`;
+            return md.inlineCode(decode(text || raw));
         case "code":
-            return {text, lang};
+            return {type, text, lang};
+        case "space":
+            return;
         default:
             return decode(text || raw);
     }
@@ -50,34 +49,38 @@ const renderPart = ({type, text, raw, lang, tokens} = {}) => {
 
 const renderMessages = text => {
     const structure = marked.lexer(text, {});
-    const parts = structure.map(renderPart);
+    const parts = structure.map(renderPart).filter(Boolean);
     return parts.reduce((messages = [], part) => {
-        if (typeof part !== "string") messages.push(part);
-        const targetPart = messages.at(-1) instanceof FormattedString ? messages.pop() : fmt``;
-        messages.push(fmt`${targetPart}${part}`);
+        if (typeof part === "string") {
+            const targetPart = messages.at(-1) instanceof Markdown ? messages.pop() : "";
+            messages.push(md`${targetPart}${part}`);
+        } else messages.push(part);
         return messages;
-    }, []);
+    }, []).filter(({type, value} = {}) => type || value);
 }
 
 const chatRequest = async ctx => {
     const {messages = []} = ctx?.session;
     const result = await ai.chat({messages});
     const {message = {}} = result?.choices?.at?.(0) || {};
-    console.log("🤖", message?.content);
+    console.log("🤖", message?.content, `\r\n`);
     message.ids = [];
     const targetMessages = renderMessages(message?.content);
     await targetMessages.reduce((promise, msg) => promise.then(async () => {
         let message_id;
-        if (msg instanceof FormattedString) {
-            ({message_id} = await ctx.replyFmt(msg).catch(handleError));
+        if (msg?.type) {
+            const file = new Blob([msg?.text], {type: "text/plain"});
+            const input = new InputFile(file, "file.txt");
+            ({message_id} = await ctx.replyWithDocument(input).catch(e => handleError(ctx, e)));
+        } else if (msg instanceof Markdown) {
+            ({message_id} = await ctx.reply(md.build(msg), {parse_mode: "MarkdownV2"}).catch(e => handleError(ctx, e)));
         } else if (msg?.text) {
-            const file = new InputFile(Buffer.from([msg?.text], "utf-8"), "file.txt");
-            ({message_id} = await ctx.replyWithDocument(file).catch(handleError));
+            ({message_id} = await ctx.reply(msg?.text).catch(e => handleError(ctx, e)));
         } else {
-            ({message_id} = await ctx.reply(msg).catch(handleError));
+            ({message_id} = await ctx.reply(msg).catch(e => handleError(ctx, e)));
         }
         message.ids.push(message_id);
-    }), Promise.resolve()).catch(handleError);
+    }), Promise.resolve()).catch(e => handleError(ctx, e));
     messages.push(message);
     return result;
 }
@@ -99,7 +102,7 @@ const chatMessage = async ctx => {
         await ctx.replyWithChatAction("typing");
         const targetName = ctx?.chat?.first_name || ctx?.chat?.last_name || ctx?.chat?.username;
         messages.push({name: sanitizeName(targetName), role: "user", content, ids: [id]});
-        console.log("👤", `[${targetName}]`, content);
+        console.log("👤", `[${targetName}]`, content, `\r\n`);
         return await chatRequest(ctx);
     } catch (e) {
         return handleError(ctx, e);
@@ -107,10 +110,6 @@ const chatMessage = async ctx => {
         clearInterval(interval);
     }
 }
-
-bot.use(hydrate());
-
-bot.use(hydrateReply);
 
 bot.use(session({
     initial: () => ({messages: []}),

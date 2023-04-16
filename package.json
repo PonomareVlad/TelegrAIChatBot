@@ -17,7 +17,8 @@
     "edge-grammy": "^0.0.1",
     "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1",
     "html-entities-decoder": "^1.0.2",
-    "marked": "npm:@ponomarevlad/marked@4.3.0-build.1"
+    "marked": "npm:@ponomarevlad/marked@4.3.0-build.1",
+    "telegram-md": "^1.2.3"
   },
   "overrides": {
     "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1",
