@@ -2,8 +2,8 @@ import {Bot, session} from "grammy";
 import configs from "../configs.json";
 import {hydrate} from "@grammyjs/hydrate";
 import {autoRetry} from "@grammyjs/auto-retry";
+import {hydrateReply} from "@grammyjs/parse-mode";
 import {freeStorage} from "@grammyjs/storage-free";
-import {hydrateReply, parseMode} from "@grammyjs/parse-mode";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName, setSystem} from "./openai.mjs";
 
 export const ai = new API(process.env.OPENAI_API_KEY);
@@ -36,7 +36,7 @@ const chatRequest = async ctx => {
     const {message = {}} = result?.choices?.at?.(0) || {};
     console.log("🤖", message?.content);
     const {message_id} = await ctx.reply(message?.content.slice(0, 4096));
-    if (message_id) message.id = message_id;
+    if (message_id) message.ids = [message_id];
     messages.push(message);
     return result;
 }
@@ -57,7 +57,7 @@ const chatMessage = async ctx => {
         const content = prepareMessage(ctx);
         await ctx.replyWithChatAction("typing");
         const targetName = ctx?.chat?.first_name || ctx?.chat?.last_name || ctx?.chat?.username;
-        messages.push({name: sanitizeName(targetName), role: "user", content, id});
+        messages.push({name: sanitizeName(targetName), role: "user", content, ids: [id]});
         console.log("👤", `[${targetName}]`, content);
         return await chatRequest(ctx);
     } catch (e) {
@@ -90,12 +90,16 @@ bot.command("start", ctx => {
 });
 
 bot.command("retry", async ctx => {
+    const interval = setInterval(() => {
+        ctx.replyWithChatAction("typing").catch(console.error);
+    }, 5000);
     try {
         console.debug("/retry");
+        await ctx.replyWithChatAction("typing");
         const {messages = []} = ctx?.session || {};
         const {message_id} = ctx?.msg?.reply_to_message || {};
         if (message_id) {
-            const message = messages.find(({id}) => id === message_id);
+            const message = messages.find(({ids = []}) => ids.includes(message_id));
             if (!message) return ctx.reply(configs?.messages?.retry?.error);
             const offset = message.role === "user" ? 1 : 0;
             messages.splice(messages.indexOf(message) + offset);
@@ -104,17 +108,23 @@ bot.command("retry", async ctx => {
         return await chatRequest(ctx);
     } catch (e) {
         return handleError(ctx, e);
+    } finally {
+        clearInterval(interval);
     }
 })
 
 bot.command("summary", async ctx => {
+    const interval = setInterval(() => {
+        ctx.replyWithChatAction("typing").catch(console.error);
+    }, 5000);
     try {
         console.debug("/summary");
+        await ctx.replyWithChatAction("typing");
         const {messages = []} = ctx?.session || {};
         const {message_id} = ctx?.msg?.reply_to_message || {};
         if (message_id) {
             const system = messages.find(isSystem);
-            const message = messages.find(({id}) => id === message_id);
+            const message = messages.find(({ids = []}) => ids.includes(message_id));
             if (!message) return ctx.reply(configs?.messages?.summary?.error);
             ctx.session.messages = [system, message].filter(Boolean);
             return ctx.reply(configs?.messages?.summary?.success);
@@ -127,6 +137,8 @@ bot.command("summary", async ctx => {
         return result;
     } catch (e) {
         return handleError(ctx, e);
+    } finally {
+        clearInterval(interval);
     }
 });
 
@@ -170,6 +182,9 @@ bot.command("tokens", async ctx => {
 });
 
 bot.command("history", async ctx => {
+    const interval = setInterval(() => {
+        ctx.replyWithChatAction("typing").catch(console.error);
+    }, 5000);
     try {
         console.debug("/history");
         const emoji = {
@@ -177,6 +192,7 @@ bot.command("history", async ctx => {
             system: "⚙️",
             assistant: "🤖",
         };
+        await ctx.replyWithChatAction("typing");
         const messages = sanitizeMessages(ctx?.session?.messages || []);
         await ctx.reply(`${messages.length} messages in history:`);
         return await messages.reduce((promise = Promise.resolve(), {role, content} = {}) => {
@@ -185,6 +201,8 @@ bot.command("history", async ctx => {
         }, Promise.resolve());
     } catch (e) {
         return handleError(ctx, e);
+    } finally {
+        clearInterval(interval);
     }
 });
 
