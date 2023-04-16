@@ -3,6 +3,7 @@ import configs from "../configs.json";
 import {md, Markdown} from "telegram-md";
 import decode from "html-entities-decoder";
 import {Bot, InputFile, session} from "grammy";
+import {autoRetry} from "@grammyjs/auto-retry";
 import {freeStorage} from "@grammyjs/storage-free";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName, setSystem} from "./openai.mjs";
 
