@@ -42,5 +42,8 @@
       "command": "tokens",
       "description": "Tokens usage"
     }
-  ]
+  ],
+  "extensions": {
+    "python": "py"
+  }
 }

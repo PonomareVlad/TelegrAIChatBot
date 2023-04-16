@@ -54,7 +54,7 @@ const renderPart = ({type, text, raw, lang, tokens} = {}) => {
         case "codespan":
             return md.inlineCode(decode(text || raw));
         case "code":
-            return {type, text, lang: getLang(text)};
+            return {type, text, lang: lang || getLang(text)};
         case "space":
             return;
         default:
@@ -84,8 +84,9 @@ const chatRequest = async ctx => {
     await targetMessages.reduce((promise, msg) => promise.then(async () => {
         let message_id;
         if (msg?.type) {
+            const ext = msg?.lang ? (configs?.extensions?.[msg.lang] || msg.lang) : "txt";
             const file = new Blob([msg?.text], {type: "text/plain"});
-            const input = new InputFile(file, `file.${msg?.lang || "txt"}`);
+            const input = new InputFile(file, `code.${ext}`);
             ({message_id} = await ctx.replyWithDocument(input).catch(e => handleError(ctx, e)));
         } else if (msg instanceof Markdown) {
             ({message_id} = await ctx.reply(md.build(msg), {parse_mode: "MarkdownV2"}).catch(e => handleError(ctx, e)));
