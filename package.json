@@ -15,10 +15,13 @@
     "@grammyjs/parse-mode": "^1.6.0",
     "@grammyjs/storage-free": "^2.1.4",
     "edge-grammy": "^0.0.1",
-    "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1"
+    "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1",
+    "html-entities-decoder": "^1.0.2",
+    "marked": "npm:@ponomarevlad/marked@4.3.0-build.1"
   },
   "overrides": {
-    "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1"
+    "grammy": "npm:@ponomarevlad/grammy@1.15.3-web.1",
+    "marked": "npm:@ponomarevlad/marked@4.3.0-build.1"
   },
   "engines": {
     "node": "^18.0.0"

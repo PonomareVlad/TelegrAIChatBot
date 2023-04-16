@@ -1,9 +1,12 @@
-import {Bot, session} from "grammy";
+import {marked} from "marked";
+import {Buffer} from 'node:buffer';
 import configs from "../configs.json";
 import {hydrate} from "@grammyjs/hydrate";
+import decode from "html-entities-decoder";
 import {autoRetry} from "@grammyjs/auto-retry";
-import {hydrateReply} from "@grammyjs/parse-mode";
+import {Bot, InputFile, session} from "grammy";
 import {freeStorage} from "@grammyjs/storage-free";
+import {FormattedString, hydrateReply, fmt, code, pre} from "@grammyjs/parse-mode";
 import {API, chatTokens, initEncoder, isSystem, sanitizeMessages, sanitizeName, setSystem} from "./openai.mjs";
 
 export const ai = new API(process.env.OPENAI_API_KEY);
@@ -11,11 +14,11 @@ export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
 const handleError = async (ctx, e) => {
     try {
-        const message = e.message || e;
+        const message = e?.message || e;
         console.error(message);
         return await ctx.reply("⚠️ " + message);
     } catch (e) {
-        console.error(e.message || e);
+        console.error(e?.message || e);
     }
 }
 
@@ -30,13 +33,51 @@ const prepareMessage = ctx => {
     ].join("");
 }
 
+const renderPart = ({type, text, raw, lang, tokens} = {}) => {
+    switch (type) {
+        case "paragraph": {
+            const parts = tokens.map(renderPart);
+            return fmt(parts.map(() => ""), ...parts);
+        }
+        case "codespan":
+            return fmt`${code(decode(text || raw))}`;
+        case "code":
+            return {text, lang};
+        default:
+            return decode(text || raw);
+    }
+}
+
+const renderMessages = text => {
+    const structure = marked.lexer(text, {});
+    const parts = structure.map(renderPart);
+    return parts.reduce((messages = [], part) => {
+        if (typeof part !== "string") messages.push(part);
+        const targetPart = messages.at(-1) instanceof FormattedString ? messages.pop() : fmt``;
+        messages.push(fmt`${targetPart}${part}`);
+        return messages;
+    }, []);
+}
+
 const chatRequest = async ctx => {
     const {messages = []} = ctx?.session;
     const result = await ai.chat({messages});
     const {message = {}} = result?.choices?.at?.(0) || {};
     console.log("🤖", message?.content);
-    const {message_id} = await ctx.reply(message?.content.slice(0, 4096));
-    if (message_id) message.ids = [message_id];
+    message.ids = [];
+    const targetMessages = renderMessages(message?.content);
+    await targetMessages.reduce((promise, msg) => promise.then(async () => {
+        let message_id;
+        if (msg instanceof FormattedString) {
+            ({message_id} = await ctx.replyFmt(msg).catch(handleError));
+        } else if (msg?.text) {
+            const file = new InputFile(Buffer.from([msg?.text], "utf-8"), "file.txt");
+            ({message_id} = await ctx.replyWithDocument(file).catch(handleError));
+        } else {
+            ({message_id} = await ctx.reply(msg).catch(handleError));
+        }
+        message.ids.push(message_id);
+    }), Promise.resolve()).catch(handleError);
     messages.push(message);
     return result;
 }
