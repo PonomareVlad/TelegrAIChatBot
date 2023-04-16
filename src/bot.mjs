@@ -1,6 +1,7 @@
 import {marked} from "marked";
 import configs from "../configs.json";
 import {md, Markdown} from "telegram-md";
+import hljs from "highlight.js/lib/common";
 import decode from "html-entities-decoder";
 import {Bot, InputFile, session} from "grammy";
 import {autoRetry} from "@grammyjs/auto-retry";
@@ -31,6 +32,19 @@ const prepareMessage = ctx => {
     ].join("");
 }
 
+const getLang = text => {
+    const source = text.toLowerCase();
+    const result = hljs.highlightAuto(text).language;
+    switch (result) {
+        case "xml":
+            if (source.includes(`<xhtml`)) return "xhtml";
+            if (source.includes(`<html`)) return "html";
+            if (source.includes(`<rss`)) return "rss";
+            if (source.includes(`<svg`)) return "svg";
+    }
+    return result;
+}
+
 const renderPart = ({type, text, raw, lang, tokens} = {}) => {
     switch (type) {
         case "paragraph": {
@@ -40,7 +54,7 @@ const renderPart = ({type, text, raw, lang, tokens} = {}) => {
         case "codespan":
             return md.inlineCode(decode(text || raw));
         case "code":
-            return {type, text, lang};
+            return {type, text, lang: getLang(text)};
         case "space":
             return;
         default:
@@ -71,7 +85,7 @@ const chatRequest = async ctx => {
         let message_id;
         if (msg?.type) {
             const file = new Blob([msg?.text], {type: "text/plain"});
-            const input = new InputFile(file, "file.txt");
+            const input = new InputFile(file, `file.${msg?.lang || "txt"}`);
             ({message_id} = await ctx.replyWithDocument(input).catch(e => handleError(ctx, e)));
         } else if (msg instanceof Markdown) {
             ({message_id} = await ctx.reply(md.build(msg), {parse_mode: "MarkdownV2"}).catch(e => handleError(ctx, e)));
